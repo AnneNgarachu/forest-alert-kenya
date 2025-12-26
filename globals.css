@@ -1,0 +1,257 @@
+/* 
+ * Forest Alert Kenya - Global Styles
+ * 
+ * Note: The @tailwind directives are valid Tailwind CSS.
+ * VS Code may show warnings but they are safe to ignore.
+ * Install "Tailwind CSS IntelliSense" extension for proper support.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap');
+
+:root {
+  /* Kenyan Theme Variables */
+  --kenya-black: #1a1a2e;
+  --kenya-red: #e63946;
+  --kenya-green: #047857;
+  --kenya-white: #f8f9fa;
+  
+  --savanna-gold: #efc050;
+  --maasai-red: #dc2626;
+  --earth-tan: #d4b896;
+  --sunset-orange: #f97316;
+  
+  --foreground-rgb: 26, 26, 46;
+  --background-rgb: 250, 246, 241;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Headings with Outfit font */
+h1, h2, h3 {
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+}
+
+/* ===== LEAFLET MAP STYLING ===== */
+.leaflet-container {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #e8d5c4;
+  border-radius: 12px;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(26, 26, 46, 0.15);
+  border: 2px solid var(--kenya-green);
+  padding: 0;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  font-size: 14px;
+}
+
+.leaflet-popup-tip {
+  background: white;
+  border: 2px solid var(--kenya-green);
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3ebe0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--kenya-green), var(--kenya-black));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--maasai-red);
+}
+
+/* ===== ALERT MARKER ANIMATIONS ===== */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+@keyframes glow-red {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.9);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* ===== LOADING SKELETON ===== */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f3ebe0 25%, #e8d5c4 50%, #f3ebe0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ===== KENYAN FLAG STRIPE ACCENT ===== */
+.kenya-stripe {
+  height: 4px;
+  background: linear-gradient(90deg, 
+    var(--kenya-black) 0%, 
+    var(--kenya-black) 25%, 
+    var(--maasai-red) 25%, 
+    var(--maasai-red) 50%, 
+    var(--kenya-green) 50%, 
+    var(--kenya-green) 75%,
+    var(--kenya-black) 75%
+  );
+}
+
+/* ===== BUTTON STYLES (without @apply) ===== */
+.btn-kenya {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  background: linear-gradient(135deg, var(--kenya-green), #065f46);
+  color: white;
+}
+
+.btn-kenya:hover {
+  background: linear-gradient(135deg, #065f46, var(--kenya-black));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+}
+
+.btn-maasai {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  background: linear-gradient(135deg, var(--maasai-red), #b91c1c);
+  color: white;
+}
+
+.btn-maasai:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* ===== CARD STYLES ===== */
+.card-kenya {
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background: white;
+  border: 1px solid #e8d5c4;
+}
+
+.card-kenya:hover {
+  box-shadow: 0 8px 30px rgba(26, 26, 46, 0.12);
+}
+
+/* ===== STAT CARD STYLES ===== */
+.stat-card {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, white 0%, #faf6f1 100%);
+  border: 1px solid #e8d5c4;
+}
+
+.stat-card-alert {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+}
+
+/* ===== BADGE STYLES ===== */
+.badge-critical {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+}
+
+.badge-warning {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+}
+
+.badge-success {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+/* ===== FOCUS STATES ===== */
+input:focus, select:focus, textarea:focus, button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--kenya-green);
+  border-color: var(--kenya-green);
+}
+
+/* ===== FOREST MARKER TOOLTIP ===== */
+.forest-tooltip {
+  background: white;
+  border: 2px solid var(--kenya-green);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.forest-marker,
+.alert-marker {
+  background: transparent;
+  border: none;
+}
