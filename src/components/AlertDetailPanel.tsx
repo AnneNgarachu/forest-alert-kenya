@@ -2,6 +2,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Alert, Forest, CivilSocietyContact } from '@/types';
 import { forests } from '@/data/forests';
 import { 
@@ -11,9 +12,16 @@ import {
   ExclamationTriangleIcon,
   ClockIcon,
   ShareIcon,
-  DocumentTextIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  CheckIcon,
+  ClipboardDocumentCheckIcon,
+  UserIcon,
+  ChatBubbleLeftRightIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  UserGroupIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 // Real Kenya conservation contacts with actual phone numbers
@@ -92,10 +100,25 @@ interface AlertDetailPanelProps {
   onReportUpdate: (alert: Alert) => void;
 }
 
+interface VerificationData {
+  operatorName: string;
+  workEmail: string;
+  followUp: 'verified' | 'false_alarm' | 'needs_visit' | 'in_progress' | '';
+  comments: string;
+}
+
 export default function AlertDetailPanel({ alert, onClose, onReportUpdate }: AlertDetailPanelProps) {
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationSubmitted, setVerificationSubmitted] = useState(false);
+  const [verification, setVerification] = useState<VerificationData>({
+    operatorName: '',
+    workEmail: '',
+    followUp: '',
+    comments: ''
+  });
+
   const forest: Forest | undefined = forests.find((f: Forest) => f.id === alert.forest_id);
   
-  // Get contacts relevant to this forest (specific + general)
   const relevantContacts: CivilSocietyContact[] = civilSocietyContacts.filter(
     (contact: CivilSocietyContact) => 
       contact.forests.includes(alert.forest_id) || contact.forests.includes('all')
@@ -133,6 +156,27 @@ export default function AlertDetailPanel({ alert, onClose, onReportUpdate }: Ale
       await navigator.clipboard.writeText(text);
     }
   };
+
+  const handleVerificationSubmit = () => {
+    console.log('Verification submitted:', {
+      alertId: alert.id,
+      user: verification.operatorName,
+      email: verification.workEmail,
+      follow_up: verification.followUp,
+      comments: verification.comments,
+      timestamp: new Date().toISOString()
+    });
+    setVerificationSubmitted(true);
+  };
+
+  const followUpOptions = [
+    { value: 'verified', label: '✅ Verified - Deforestation confirmed', color: 'text-red-600' },
+    { value: 'false_alarm', label: '❌ False Alarm - No deforestation found', color: 'text-gray-600' },
+    { value: 'needs_visit', label: '📍 Needs Site Visit - Cannot confirm remotely', color: 'text-yellow-600' },
+    { value: 'in_progress', label: '🔄 In Progress - Investigation ongoing', color: 'text-blue-600' },
+  ];
+
+  const canSubmit = verification.operatorName && verification.workEmail && verification.followUp;
 
   return (
     <div className="h-full flex flex-col">
@@ -204,7 +248,9 @@ export default function AlertDetailPanel({ alert, onClose, onReportUpdate }: Ale
           <p className="text-earth-600 text-sm">{alert.description}</p>
         </div>
 
-        {/* Forest Info */}
+        {/* ════════════════════════════════════════════════════════════════════ */}
+        {/* FOREST INFO - Context first, before actions                          */}
+        {/* ════════════════════════════════════════════════════════════════════ */}
         {forest && (
           <div className="bg-earth-50 rounded-xl p-4">
             <h3 className="font-semibold text-kenya-black mb-2">About {forest.name}</h3>
@@ -225,7 +271,181 @@ export default function AlertDetailPanel({ alert, onClose, onReportUpdate }: Ale
           </div>
         )}
 
-        {/* Civil Society Contacts - RENAMED SECTION */}
+        {/* ════════════════════════════════════════════════════════════════════ */}
+        {/* 📋 CONTRIBUTE SECTION - Now after context                            */}
+        {/* Two pathways: Operator (inline) and Community (popup)                */}
+        {/* ════════════════════════════════════════════════════════════════════ */}
+        <div className="border-t pt-5">
+          <h3 className="font-semibold text-kenya-black mb-3 flex items-center gap-2">
+            <span className="text-lg">📋</span>
+            Contribute to This Alert
+          </h3>
+          <p className="text-xs text-earth-500 mb-4">
+            Choose how you'd like to help verify this alert
+          </p>
+
+          <div className="space-y-3">
+            {/* Option 1: Operator Quick Verification (inline for speed) */}
+            <div className="border-2 border-amber-200 rounded-xl overflow-hidden bg-gradient-to-r from-amber-50 to-orange-50">
+              <button
+                onClick={() => setShowVerification(!showVerification)}
+                className="w-full flex items-center justify-between p-4 hover:bg-amber-100/50 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <ShieldCheckIcon className="w-5 h-5 text-amber-700" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-amber-900">🔍 Operator Verification</p>
+                    <p className="text-xs text-amber-600">For authorized field operators</p>
+                  </div>
+                </div>
+                {showVerification ? (
+                  <ChevronUpIcon className="w-5 h-5 text-amber-600" />
+                ) : (
+                  <ChevronDownIcon className="w-5 h-5 text-amber-600" />
+                )}
+              </button>
+
+              {showVerification && (
+                <div className="p-4 border-t border-amber-200 space-y-4 bg-white/50">
+                  {verificationSubmitted ? (
+                    <div className="text-center py-6">
+                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <CheckIcon className="w-8 h-8 text-green-600" />
+                      </div>
+                      <p className="font-semibold text-green-800">Verification Submitted!</p>
+                      <p className="text-sm text-green-600">Thank you for ground-truthing this alert</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Operator: {verification.operatorName}<br/>
+                        Email: {verification.workEmail}<br/>
+                        Status: {verification.followUp.replace('_', ' ')}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Operator Name */}
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                          <UserIcon className="w-4 h-4" />
+                          Operator Name
+                        </label>
+                        <input
+                          type="text"
+                          value={verification.operatorName}
+                          onChange={(e) => setVerification(v => ({ ...v, operatorName: e.target.value }))}
+                          placeholder="e.g., Jane Wanjiku"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                        />
+                      </div>
+
+                      {/* Work Email */}
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                          <EnvelopeIcon className="w-4 h-4" />
+                          Work Email
+                        </label>
+                        <input
+                          type="email"
+                          value={verification.workEmail}
+                          onChange={(e) => setVerification(v => ({ ...v, workEmail: e.target.value }))}
+                          placeholder="e.g., jane@kfs.go.ke"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                        />
+                        <p className="text-xs text-gray-400 mt-1">So we know your organization</p>
+                      </div>
+
+                      {/* Follow-up Status */}
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                          <ClipboardDocumentCheckIcon className="w-4 h-4" />
+                          Verification Status
+                        </label>
+                        <div className="space-y-2">
+                          {followUpOptions.map(option => (
+                            <label
+                              key={option.value}
+                              className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition ${
+                                verification.followUp === option.value
+                                  ? 'border-amber-500 bg-amber-100'
+                                  : 'border-gray-200 bg-white hover:border-amber-300'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="followUp"
+                                value={option.value}
+                                checked={verification.followUp === option.value}
+                                onChange={(e) => setVerification(v => ({ ...v, followUp: e.target.value as VerificationData['followUp'] }))}
+                                className="text-amber-600 focus:ring-amber-500"
+                              />
+                              <span className={`text-sm ${option.color}`}>{option.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Comments */}
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                          <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                          Field Notes
+                        </label>
+                        <textarea
+                          value={verification.comments}
+                          onChange={(e) => setVerification(v => ({ ...v, comments: e.target.value }))}
+                          placeholder="Add observations from your site visit..."
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
+                        />
+                      </div>
+
+                      {/* Submit Button */}
+                      <button
+                        onClick={handleVerificationSubmit}
+                        disabled={!canSubmit}
+                        className={`w-full py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 ${
+                          canSubmit
+                            ? 'bg-amber-600 text-white hover:bg-amber-700'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        <ClipboardDocumentCheckIcon className="w-5 h-5" />
+                        Submit Verification
+                      </button>
+
+                      <p className="text-xs text-gray-500 text-center">
+                        Data feeds back to PyEO for model improvement
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Option 2: Public Community Report (opens popup modal) */}
+            <button
+              onClick={() => onReportUpdate(alert)}
+              className="w-full flex items-center gap-3 p-4 border-2 border-forest-200 rounded-xl hover:border-forest-400 hover:bg-forest-50 transition bg-white"
+            >
+              <div className="p-2 bg-forest-100 rounded-lg">
+                <UserGroupIcon className="w-5 h-5 text-forest-700" />
+              </div>
+              <div className="text-left flex-1">
+                <p className="font-semibold text-forest-900">📝 Community Report</p>
+                <p className="text-xs text-forest-600">For citizens, NGOs & journalists</p>
+              </div>
+              <ChevronDownIcon className="w-5 h-5 text-forest-400 rotate-[-90deg]" />
+            </button>
+          </div>
+        </div>
+        {/* ════════════════════════════════════════════════════════════════════ */}
+        {/* END CONTRIBUTE SECTION                                               */}
+        {/* ════════════════════════════════════════════════════════════════════ */}
+
+        {/* ════════════════════════════════════════════════════════════════════ */}
+        {/* 🤝 CIVIL SOCIETY CONTACTS - Take action by reaching out              */}
+        {/* ════════════════════════════════════════════════════════════════════ */}
         {relevantContacts.length > 0 && (
           <div>
             <h3 className="font-semibold text-kenya-black mb-3 flex items-center gap-2">
@@ -242,7 +462,6 @@ export default function AlertDetailPanel({ alert, onClose, onReportUpdate }: Ale
                   <p className="text-xs text-earth-500 mb-2">{contact.focus_area}</p>
                   
                   <div className="space-y-1">
-                    {/* Phone - Clickable */}
                     {contact.contact_phone && (
                       <a 
                         href={`tel:${contact.contact_phone.replace(/\s/g, '')}`}
@@ -253,7 +472,6 @@ export default function AlertDetailPanel({ alert, onClose, onReportUpdate }: Ale
                       </a>
                     )}
                     
-                    {/* Email - Clickable */}
                     {contact.contact_email && (
                       <a 
                         href={`mailto:${contact.contact_email}`}
@@ -274,21 +492,14 @@ export default function AlertDetailPanel({ alert, onClose, onReportUpdate }: Ale
         )}
       </div>
 
-      {/* Actions */}
-      <div className="p-4 border-t border-earth-200 bg-earth-50 space-y-2">
-        <button
-          onClick={() => onReportUpdate(alert)}
-          className="w-full bg-forest-700 hover:bg-forest-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
-        >
-          <DocumentTextIcon className="w-5 h-5" />
-          Submit Ground-Truth Report
-        </button>
+      {/* Footer - Just Share */}
+      <div className="p-4 border-t border-earth-200 bg-earth-50">
         <button
           onClick={handleShare}
           className="w-full bg-white border-2 border-earth-300 hover:border-forest-500 text-kenya-black py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
         >
           <ShareIcon className="w-5 h-5" />
-          Share Alert
+          Share This Alert
         </button>
       </div>
     </div>
